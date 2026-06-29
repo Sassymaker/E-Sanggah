@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E-Sanggah Absensi Pegawai</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <section id="loginPage" class="login-page">
+      <div class="hero-card">
+        <img src="assets/logo.svg" alt="Logo E-Sanggah" class="hero-logo">
+        <p class="eyebrow">Sistem Sanggahan Absensi Pegawai</p>
+        <h1>E-Sanggah</h1>
+        <p class="hero-text">Ajukan sanggahan absensi, unggah bukti dukung, dan pantau status pemeriksaan dari admin.</p>
+        <div class="feature-grid">
+          <span>Login Admin/User</span>
+          <span>Upload Bukti</span>
+          <span>Rekap Bulanan</span>
+          <span>Export Excel</span>
+        </div>
+      </div>
+
+      <form id="loginForm" class="auth-card">
+        <h2>Masuk Aplikasi</h2>
+        <p class="muted">Pilih peran sesuai akun yang digunakan.</p>
+        <label>
+          Peran
+          <select id="loginRole" required>
+            <option value="user">User / Pegawai</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
+        <label>
+          Username
+          <input id="loginUsername" type="text" placeholder="contoh: user" required>
+        </label>
+        <label>
+          Password
+          <input id="loginPassword" type="password" placeholder="contoh: user123" required>
+        </label>
+        <button type="submit" class="btn primary full">Login</button>
+        <p class="hint">Akun demo awal: admin/admin123 dan user/user123. Ubah lewat file <code>.env</code> sebelum dipakai produksi.</p>
+      </form>
+    </section>
+
+    <section id="appPage" class="app-page hidden">
+      <aside class="sidebar">
+        <div class="brand-row">
+          <img src="assets/logo.svg" alt="Logo" class="brand-logo">
+          <div>
+            <strong>E-Sanggah</strong>
+            <small>Absensi Pegawai</small>
+          </div>
+        </div>
+        <nav>
+          <button class="nav-link active" data-target="dashboardSection">Dashboard</button>
+          <button id="userMenuButton" class="nav-link" data-target="userSection">Input Sanggahan</button>
+          <button id="adminMenuButton" class="nav-link" data-target="adminSection">Rekap Admin</button>
+        </nav>
+        <button id="logoutButton" class="btn ghost">Keluar</button>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Selamat datang</p>
+            <h2 id="welcomeTitle">Dashboard</h2>
+          </div>
+          <div class="user-pill">
+            <span id="currentUserName">-</span>
+            <strong id="currentUserRole">-</strong>
+          </div>
+        </header>
+
+        <section id="dashboardSection" class="content-section active">
+          <div id="dashboardCards" class="stat-grid"></div>
+          <div class="panel">
+            <h3>Informasi Sistem</h3>
+            <p id="systemInfo" class="muted"></p>
+          </div>
+        </section>
+
+        <section id="userSection" class="content-section">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h3 id="formTitle">Form Sanggahan Absensi</h3>
+                <p class="muted">Isi data sesuai absensi yang ingin disanggah.</p>
+              </div>
+              <button id="cancelEditButton" class="btn ghost hidden" type="button">Batal Edit</button>
+            </div>
+
+            <form id="sanggahForm" class="form-grid" enctype="multipart/form-data">
+              <input type="hidden" id="editId">
+              <label>
+                Nama Lengkap
+                <input id="namaLengkap" name="namaLengkap" type="text" required>
+              </label>
+              <label>
+                NIP / NI PPPK
+                <input id="nip" name="nip" type="text" required>
+              </label>
+              <label>
+                Hari yang Disanggah
+                <select id="hariDisanggah" name="hariDisanggah" required>
+                  <option value="">Pilih hari</option>
+                  <option>Senin</option>
+                  <option>Selasa</option>
+                  <option>Rabu</option>
+                  <option>Kamis</option>
+                  <option>Jum'at</option>
+                </select>
+              </label>
+              <label>
+                Tanggal yang Disanggah
+                <input id="tanggalDisanggah" name="tanggalDisanggah" type="date" required>
+              </label>
+              <label class="span-2">
+                Alasan Sanggahan
+                <textarea id="alasanSanggahan" name="alasanSanggahan" rows="4" placeholder="Tuliskan alasan secara jelas" required></textarea>
+              </label>
+              <label>
+                Bukti Dukung Sanggahan
+                <input id="buktiDukung" name="buktiDukung" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" required>
+                <small>PDF/JPG/PNG/WEBP/DOC/DOCX, maksimal 5 MB.</small>
+              </label>
+              <label>
+                Surat Pernyataan
+                <input id="suratPernyataan" name="suratPernyataan" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" required>
+                <small>Wajib diunggah saat input baru.</small>
+              </label>
+              <div class="span-2 action-row">
+                <button id="submitSanggahButton" type="submit" class="btn primary">Kirim Sanggahan</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Riwayat Sanggahan Saya</h3>
+              <button id="refreshUserButton" class="btn ghost" type="button">Refresh</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Tanggal</th>
+                    <th>Hari</th>
+                    <th>Alasan</th>
+                    <th>File</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="userTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="adminSection" class="content-section">
+          <div class="panel">
+            <div class="panel-header wrap">
+              <div>
+                <h3>Rekap Sanggahan User</h3>
+                <p class="muted">Admin dapat melihat, memfilter, mengubah status, menghapus, dan mengunduh data.</p>
+              </div>
+              <button id="downloadButton" class="btn primary" type="button">Download Excel</button>
+            </div>
+            <div class="filter-row">
+              <label>
+                Bulan
+                <input id="filterMonth" type="month">
+              </label>
+              <label>
+                Status
+                <select id="filterStatus">
+                  <option value="">Semua</option>
+                  <option>Menunggu</option>
+                  <option>Disetujui</option>
+                  <option>Ditolak</option>
+                  <option>Perlu Revisi</option>
+                </select>
+              </label>
+              <label>
+                Cari
+                <input id="filterSearch" type="search" placeholder="Nama, NIP, alasan">
+              </label>
+              <button id="applyFilterButton" class="btn ghost" type="button">Terapkan</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nama</th>
+                    <th>NIP / NI PPPK</th>
+                    <th>Hari</th>
+                    <th>Tanggal</th>
+                    <th>Alasan</th>
+                    <th>File</th>
+                    <th>Status</th>
+                    <th>Catatan</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="adminTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <dialog id="statusDialog" class="dialog">
+    <form id="statusForm" method="dialog">
+      <input type="hidden" id="statusEditId">
+      <h3>Update Status Sanggahan</h3>
+      <label>
+        Status
+        <select id="statusInput" required>
+          <option>Menunggu</option>
+          <option>Disetujui</option>
+          <option>Ditolak</option>
+          <option>Perlu Revisi</option>
+        </select>
+      </label>
+      <label>
+        Catatan Admin
+        <textarea id="catatanAdminInput" rows="4" placeholder="Catatan pemeriksaan"></textarea>
+      </label>
+      <div class="action-row right">
+        <button id="closeDialogButton" class="btn ghost" type="button">Batal</button>
+        <button class="btn primary" type="submit">Simpan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
